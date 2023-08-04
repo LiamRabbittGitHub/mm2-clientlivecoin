@@ -1,5 +1,5 @@
-package config
-
+package config // Defines the package name
+// Importing required libraries and packages
 import (
 	"encoding/json"
 	"errors"
@@ -15,6 +15,7 @@ import (
 	"strconv"
 )
 
+// Represents a single Electrum server configuration
 type ElectrumData struct {
 	URL                     string  `json:"url"`
 	WSURL                   *string `json:"ws_url,omitempty"`
@@ -22,11 +23,13 @@ type ElectrumData struct {
 	DisableCertVerification *bool   `json:"disable_cert_verification,omitempty"`
 }
 
+// Represents a single node's configuration
 type NodesData struct {
 	URL                     string  `json:"url"`
 	GuiAuth                 *bool   `json:"gui_auth,omitempty"`
 }
 
+// Defines the overall desktop configuration, including coin properties, nodes, and Electrum servers
 type DesktopCFG struct {
 	Coin               string         `json:"coin"`
 	Name               string         `json:"name"`
@@ -48,6 +51,7 @@ type DesktopCFG struct {
 	IsTestNet          bool           `json:"is_testnet,omitempty"`
 }
 
+// Constant URLs and contract addresses for different blockchain networks and tokens
 const (
 	GasStationErc20                        = "https://ethgasstation.info/json/ethgasAPI.json"
 	GasStationMatic                        = "https://gasstation-mainnet.matic.network"
@@ -117,11 +121,14 @@ const (
 	UbiqTestnetFallbackContractAddress     = UbiqTestnetContractAddress
 )
 
+// Global registry for storing desktop configurations
 var GCFGRegistry = make(map[string]*DesktopCFG)
 
+// Defines the number of decimals for different gas stations
 var GasStationMaticDecimals = 9
 var GasStationErc20Decimals = 8
 
+// Retrieves the path to the desktop database depending on the operating system
 func GetDesktopDB() *string {
 	result := os.Getenv("HOME") + "atomic_qt/mm2/DB"
 	switch runtime.GOOS {
@@ -137,6 +144,7 @@ func GetDesktopDB() *string {
 	return &result
 }
 
+// Retrieves the path to the desktop application depending on the operating system and application name
 func GetDesktopPath(appName string) string {
 	if appName == "standard" {
 		switch runtime.GOOS {
@@ -163,6 +171,7 @@ func GetDesktopPath(appName string) string {
 	}
 }
 
+// Parses the desktop registry from a given version
 func ParseDesktopRegistry(version string) {
 	var desktopCoinsPath = constants.GMM2Dir + "/coins_config.json"
 	file, _ := ioutil.ReadFile(desktopCoinsPath)
@@ -173,6 +182,7 @@ func ParseDesktopRegistry(version string) {
 	helpers.PrintCheck("Successfully load desktop cfg with "+strconv.Itoa(len(GCFGRegistry))+" coins", true)
 }
 
+// Parses the desktop registry from a file path
 func ParseDesktopRegistryFromFile(path string) bool {
 	if constants.GDesktopCfgLoaded {
 		return true
@@ -194,6 +204,7 @@ func ParseDesktopRegistryFromFile(path string) bool {
 	return false
 }
 
+// Parses the desktop registry from a given JSON string
 func ParseDesktopRegistryFromString(cfg string) bool {
 	if constants.GDesktopCfgLoaded {
 		return true
@@ -206,6 +217,7 @@ func ParseDesktopRegistryFromString(cfg string) bool {
 	return false
 }
 
+// Parses the desktop registry from a given URL
 func ParseDesktopRegistryFromUrl(url string) error {
 	if constants.GDesktopCfgLoaded {
 		return nil
@@ -231,6 +243,7 @@ func ParseDesktopRegistryFromUrl(url string) error {
 	return errors.New("unknown error")
 }
 
+// Retrieves the gas station URL based on the coin type
 func (cfg *DesktopCFG) RetrieveGasStationUrl() string {
 	switch cfg.Type {
 	case "ERC-20":
@@ -241,6 +254,7 @@ func (cfg *DesktopCFG) RetrieveGasStationUrl() string {
 	return ""
 }
 
+// Retrieves the gas station decimals based on the coin type
 func (cfg *DesktopCFG) RetrieveGasStationDecimals() *int {
 	switch cfg.Type {
 	case "ERC-20":
@@ -251,6 +265,7 @@ func (cfg *DesktopCFG) RetrieveGasStationDecimals() *int {
 	return nil
 }
 
+// Retrieves the contract addresses based on the coin type
 func (cfg *DesktopCFG) RetrieveContracts() (string, string) {
 	switch cfg.Type {
 	case "Arbitrum":
@@ -354,6 +369,7 @@ func (cfg *DesktopCFG) RetrieveContracts() (string, string) {
 	}
 }
 
+// Retrieves the Electrum servers based on the coin type
 func (cfg *DesktopCFG) RetrieveElectrums() []ElectrumData {
 	functorElectrum := func(in []ElectrumData) []ElectrumData {
 		if runtime.GOARCH != "wasm" {
@@ -392,6 +408,7 @@ func (cfg *DesktopCFG) RetrieveElectrums() []ElectrumData {
 	return functorElectrum(cfg.Electrum)
 }
 
+// Updates the configuration file
 func Update(version string) {
 	//fmt.Println("Updating cfg")
 	_ = glg.Infof("Updating cfg")
@@ -412,6 +429,7 @@ func Update(version string) {
 	}
 }
 
+// Retrieves a list of active coins
 func RetrieveActiveCoins() []string {
 	var out []string
 	for _, value := range GCFGRegistry {
@@ -422,6 +440,7 @@ func RetrieveActiveCoins() []string {
 	return out
 }
 
+// Retrieves a list of all coins
 func RetrieveAllCoins() []string {
 	var out []string
 	for _, value := range GCFGRegistry {
